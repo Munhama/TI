@@ -1,15 +1,16 @@
 import java.util.ArrayList;
 
-public class Frequency {
-    public Character symbol;
+public class StrWithFreq {
+    public String symbol;
     public double freq;
 
-    public Frequency(ArrayList<Character> all, Character symbol) {
+    public StrWithFreq(ArrayList<String> all, String symbol) {
         this.symbol = symbol;
         int j = 0;
-        for (Character ch : all) {
+        for (String ch : all) {
             if (this.symbol.equals(ch)) j++;
         }
+
         this.freq = j * 1.0 / all.size();
     }
 }
