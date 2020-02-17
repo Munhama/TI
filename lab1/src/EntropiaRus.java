@@ -2,22 +2,28 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class Entropia {
-    public Entropia(String fileName) {
+public class EntropiaRus {
+    public EntropiaRus(String fileName) {
         ArrayList<Character> readArr = new ArrayList<Character>();
         try (FileReader reader = new FileReader(fileName)) {
             int c;
             while ((c = reader.read()) != -1) {
-
-                readArr.add((char) c);
+                Character ch = (char) c;
+                readArr.add(ch.toString().toLowerCase().charAt(0));
             }
         } catch (IOException ex) {
 
             System.out.println(ex.getMessage());
         }
 
+        ArrayList<Character> readArr2 = new ArrayList<Character>();
+        String[] string = readArr.toString().replaceAll("[^а-яё]", "").split("");
+        for (String str : string) {
+            readArr2.add(str.charAt(0));
+        }
+
         StringBuilder wordsChangeNotRepeat = new StringBuilder();
-        for (char c : readArr) {
+        for (char c : readArr2) {
             if (wordsChangeNotRepeat.toString().indexOf(c) == -1)
                 wordsChangeNotRepeat.append(c);
         }
@@ -26,7 +32,7 @@ public class Entropia {
 
         ArrayList<Frequency> frArr = new ArrayList<Frequency>();
         for (String ch : result.split("")) {
-            frArr.add(new Frequency(readArr, ch.charAt(0)));
+            frArr.add(new Frequency(readArr2, ch.charAt(0)));
         }
 
         double H = 0;

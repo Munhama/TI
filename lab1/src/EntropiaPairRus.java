@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-public class EntropiaPair {
-    public EntropiaPair(String fileName) {
+public class EntropiaPairRus {
+    public EntropiaPairRus(String fileName) {
         ArrayList<Character> readArr = new ArrayList<Character>();
         try (FileReader reader = new FileReader(fileName)) {
 
@@ -19,9 +19,15 @@ public class EntropiaPair {
             System.out.println(ex.getMessage());
         }
 
+        ArrayList<Character> readArr2 = new ArrayList<Character>();
+        String[] string = readArr.toString().replaceAll("[^а-яё]", "").split("");
+        for (String str : string) {
+            readArr2.add(str.charAt(0));
+        }
+
         ArrayList<String> arrStr = new ArrayList<String>();
-        for (int i = 1; i < readArr.size(); i++) {
-            arrStr.add(readArr.get(i - 1).toString() + readArr.get(i).toString());
+        for (int i = 1; i < readArr2.size(); i++) {
+            arrStr.add(readArr2.get(i - 1).toString() + readArr2.get(i).toString());
         }
 
         Set<String> unic = new HashSet<String>(arrStr);
