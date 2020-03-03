@@ -86,13 +86,35 @@ public class HuffmanCode {
         printCodes(tree, new StringBuffer());
         String coded = result;
 
-        double awg = 0;
+        double L = 0;
         for (SymbolPrefix sp : symbolPrefixes) {
             coded = coded.replaceAll(sp.symbol, sp.prefix);
-            awg += sp.prefix.length();
+            double P = 0.0;
+            switch (fileName) {
+                case "F1.txt":
+                    P = 1.0 / 3;
+                    break;
+                case "F3.txt":
+                    P = 1.0 / 34;
+                    break;
+                case "F2.txt":
+                    switch (sp.symbol) {
+                        case "a":
+                            P = 1.0 / 2;
+                            break;
+                        case "b":
+                            P = 3.0 / 10;
+                            break;
+                        case "c":
+                            P = 1.0 / 5;
+                            break;
+                    }
+                    break;
+            }
+            L += sp.prefix.length()*P;
         }
-        double L = awg/symbolPrefixes.size();
-//        System.out.println("L " + L);
+
+        System.out.println("L " + L);
 
         StringBuilder wordsChangeNotRepeat = new StringBuilder();
         for (char c : coded.toCharArray()) {
