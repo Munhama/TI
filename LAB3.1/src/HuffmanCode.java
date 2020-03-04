@@ -1,0 +1,191 @@
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.PriorityQueue;
+
+public class HuffmanCode {
+
+    private static ArrayList<SymbolPrefix> symbolPrefixes;
+    public static ArrayList<String> symbols = new ArrayList<>();
+    public static ArrayList<Integer> prefixs = new ArrayList<>();
+
+    public static HuffmanTree buildTree(int[] charFreqs) {
+        PriorityQueue<HuffmanTree> trees = new PriorityQueue<HuffmanTree>();
+
+        for (int i = 0; i < charFreqs.length; i++)
+            if (charFreqs[i] > 0)
+                trees.offer(new HuffmanLeaf(charFreqs[i], (char) i));
+
+        assert trees.size() > 0;
+
+        while (trees.size() > 1) {
+
+            HuffmanTree a = trees.poll();
+            HuffmanTree b = trees.poll();
+            trees.offer(new HuffmanNode(a, b));
+        }
+        return trees.poll();
+    }
+
+    public static void printCodes(HuffmanTree tree, StringBuffer prefix) {
+        assert tree != null;
+        if (tree instanceof HuffmanLeaf) {
+            HuffmanLeaf leaf = (HuffmanLeaf) tree;
+            symbolPrefixes.add(new SymbolPrefix(leaf.value.toString(), prefix.toString()));
+//            System.out.println(leaf.value.toString() + "--"+prefix.toString());
+            symbols.add(leaf.value.toString());
+            prefixs.add(Integer.parseInt(prefix.toString()));
+        } else if (tree instanceof HuffmanNode) {
+            HuffmanNode node = (HuffmanNode) tree;
+
+            prefix.append('0');
+            printCodes(node.left, prefix);
+            prefix.deleteCharAt(prefix.length() - 1);
+
+            prefix.append('1');
+            printCodes(node.right, prefix);
+            prefix.deleteCharAt(prefix.length() - 1);
+        }
+    }
+
+    public static void entropia(String fileName) {
+        ArrayList<Character> readArr = new ArrayList<Character>();
+        try (FileReader reader = new FileReader(fileName)) {
+            int c;
+            while ((c = reader.read()) != -1) {
+                char ch = (char) c;
+                readArr.add(Character.toString(ch).toLowerCase().charAt(0));
+            }
+        } catch (IOException ex) {
+
+            System.out.println(ex.getMessage());
+        }
+
+        ArrayList<Character> readArr2 = new ArrayList<Character>();
+        StringBuilder wordsChange = new StringBuilder();
+        if (fileName.equals("F3.txt")) {
+            String[] string = readArr.toString().replaceAll("[^а-яё]", "").split("");
+            for (String str : string) {
+                readArr2.add(str.charAt(0));
+            }
+
+            for (char c : readArr2) {
+                wordsChange.append(c);
+            }
+        } else {
+            for (char c : readArr) {
+                wordsChange.append(c);
+            }
+        }
+        String result = wordsChange.toString();
+
+        int[] charFreqs = new int[10000];
+        for (char c : result.toCharArray()) {
+            charFreqs[c]++;
+        }
+
+        HuffmanTree tree = buildTree(charFreqs);
+
+        symbolPrefixes = new ArrayList<>();
+        symbols = new ArrayList<>();
+        prefixs = new ArrayList<>();
+
+        System.out.println("______________________________________________________");
+        printCodes(tree, new StringBuffer());
+//        System.out.println(prefixs);
+
+        for (int i = 1; i < prefixs.size()-1; i++) {
+            for (int j = prefixs.size()-1; j >=i; j--) {
+                int temp = 0;
+                String t = "";
+
+                if (prefixs.get(j-1) > prefixs.get(j)) {
+                    temp = prefixs.get(j-1);
+
+                    prefixs.set(j-1, prefixs.get(j));
+                    prefixs.set(j, temp);
+
+                    t = symbols.get(j-1);
+
+
+                    symbols.set(j-1, symbols.get(j));
+                    symbols.set(j, t);
+                }
+            }
+        }
+
+        for (int i = 0; i < prefixs.size(); i++) {
+            if(symbols.get(i).equals("р") || symbols.get(i).equals("п") || symbols.get(i).equals("к") || symbols.get(i).equals("м"))
+                continue;
+            System.out.println(symbols.get(i) + "--" + prefixs.get(i));
+        }
+
+
+        String coded = result;
+
+        double L = 0;
+        for (SymbolPrefix sp : symbolPrefixes) {
+            coded = coded.replaceAll(sp.symbol, sp.prefix);
+            double P = 0.0;
+            switch (fileName) {
+                case "F1.txt":
+                    P = 1.0 / 3;
+                    break;
+                case "F3.txt":
+                    P = 1.0 / 34;
+                    break;
+                case "F2.txt":
+                    switch (sp.symbol) {
+                        case "a":
+                            P = 1.0 / 2;
+                            break;
+                        case "b":
+                            P = 3.0 / 10;
+                            break;
+                        case "c":
+                            P = 1.0 / 5;
+                            break;
+                    }
+                    break;
+            }
+            L += sp.prefix.length() * P;
+        }
+
+        System.out.println("L " + L);
+
+        StringBuilder wordsChangeNotRepeat = new StringBuilder();
+        for (char c : coded.toCharArray()) {
+            if (wordsChangeNotRepeat.toString().indexOf(c) == -1)
+                wordsChangeNotRepeat.append(c);
+        }
+
+        ArrayList<Frequency> frArr = new ArrayList<Frequency>();
+        for (String ch : wordsChangeNotRepeat.toString().split("")) {
+            frArr.add(new Frequency(coded.toCharArray(), ch.charAt(0)));
+        }
+
+        double H = 0;
+        for (Frequency fr : frArr) {
+
+            H += fr.freq * (Math.log10(fr.freq) / Math.log10(2));
+        }
+        H *= -1;
+
+        Entropia e = new Entropia(fileName);
+        double mu = L - e.entrop;
+        System.out.println("mu " + mu);
+        System.out.println("H " + H);
+        EntropiaPair ep = new EntropiaPair(coded);
+        System.out.println("Pair " + ep.entropPair);
+        EntropiaTriple et = new EntropiaTriple(coded);
+        System.out.println("Triple " + et.entropPair);
+    }
+
+    public static void main(String[] args) {
+
+        entropia("F1.txt");
+        entropia("F2.txt");
+        entropia("F3.txt");
+
+    }
+}
